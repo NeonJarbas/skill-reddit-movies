@@ -3,7 +3,7 @@ from os.path import join, dirname
 from ovos_plugin_common_play.ocp import MediaType, PlaybackType
 from ovos_utils.parse import fuzzy_match, MatchStrategy
 from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill, \
-    ocp_search
+    ocp_search, ocp_featured_media
 from reddit_movies import RedditMovies
 
 
@@ -17,6 +17,9 @@ class RedditMoviesSkill(OVOSCommonPlaybackSkill):
                                 MediaType.GENERIC,
                                 MediaType.VIDEO]
 
+        self.reddit = RedditMovies()
+
+    def initialize(self):
         # get your own keys! these might stop working any time
         if "praw_client" not in self.settings:
             self.settings["praw_client"] = "Cij47m8Dg6dSIA"
@@ -28,10 +31,7 @@ class RedditMoviesSkill(OVOSCommonPlaybackSkill):
             self.reddit = RedditMovies(
                 client=self.settings["praw_client"],
                 secret=self.settings["praw_secret"])
-        else:
-            self.reddit = RedditMovies()
 
-    def initialize(self):
         self.schedule_event(self._scrap_reddit, 1)
 
     def _scrap_reddit(self, message=None):
@@ -80,6 +80,21 @@ class RedditMoviesSkill(OVOSCommonPlaybackSkill):
                 "title": v["title"],
                 "skill_id": self.skill_id
             }
+
+    @ocp_featured_media()
+    def featured_media(self):
+        return [{
+            "match_confidence": 50,
+            "media_type": MediaType.MOVIE,
+            #  "length": v.length * 1000,
+            "uri": "youtube//" + v["url"],
+            "playback": PlaybackType.VIDEO,
+            "image": v.get("thumbnail") or self.skill_icon,
+            "bg_image": v.get("thumbnail") or self.skill_icon,
+            "skill_icon": self.skill_icon,
+            "title": v["title"],
+            "skill_id": self.skill_id
+        } for v in self.reddit.get_cached_entries()]
 
 
 def create_skill():
