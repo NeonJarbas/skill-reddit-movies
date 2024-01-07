@@ -1,4 +1,4 @@
-# r/FullLengthFilms Skill
+# Reddit Movies Skill
 
 ![](./ui/logo.png)
 
