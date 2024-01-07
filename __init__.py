@@ -40,11 +40,14 @@ class RedditMoviesSkill(OVOSCommonPlaybackSkill):
             if '"' in t:
                 t = t.split('"')[1]
             movies.append(t.strip())
-        for v in self.reddit.scrap():
-            t = v["title"].split(" (")[0].replace("COMPLETE", "")
-            if '"' in t:
-                t = t.split('"')[1]
-            movies.append(t.strip())
+        try:
+            for v in self.reddit.scrap():
+                t = v["title"].split(" (")[0].replace("COMPLETE", "")
+                if '"' in t:
+                    t = t.split('"')[1]
+                movies.append(t.strip())
+        except:
+            pass
         self.register_ocp_keyword(MediaType.MOVIE,
                                   "movie_name", movies)
         self.schedule_event(self._scrap_reddit, 3600)  # repeat every hour
@@ -78,7 +81,20 @@ class RedditMoviesSkill(OVOSCommonPlaybackSkill):
                         "skill_id": self.skill_id
                     }
         if skill:
-            yield self.featured_media()
+            yield self.get_playlist()
+
+    def get_playlist(self, score=50, num_entries=25):
+        pl = self.featured_media()[:num_entries]
+        return {
+            "match_confidence": score,
+            "media_type": MediaType.MOVIE,
+            "playlist": pl,
+            "playback": PlaybackType.VIDEO,
+            "skill_icon": self.skill_icon,
+            "image": self.skill_icon,
+            "title": "Reddit Movies (Movie Playlist)",
+            "author": "Reddit"
+        }
 
     @ocp_featured_media()
     def featured_media(self):
