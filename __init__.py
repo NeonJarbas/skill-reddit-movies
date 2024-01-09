@@ -9,7 +9,7 @@ from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
 
 class RedditMoviesSkill(OVOSCommonPlaybackSkill):
     def __init__(self, *args, **kwargs):
-        self.skill_icon = join(dirname(__file__), "ui", "logo.png")
+        self.skill_icon = join(dirname(__file__), "res", "logo.png")
         self.supported_media = [MediaType.MOVIE]
 
         self.reddit = RedditMovies()
